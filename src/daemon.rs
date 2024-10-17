@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
 
-use bitcoin::{consensus::deserialize, hashes::hex::FromHex};
-use bitcoin::{Amount, BlockHash, Transaction, Txid};
-use bitcoincore_rpc::{json, jsonrpc, Auth, Client, RpcApi};
+use satsnet::{consensus::deserialize, hashes::hex::FromHex};
+use satsnet::{Amount, BlockHash, Transaction, Txid};
+use satsnet_rpc::{json, jsonrpc, Auth, Client, RpcApi};
 use crossbeam_channel::Receiver;
 use parking_lot::Mutex;
 use serde::Serialize;
@@ -149,7 +149,7 @@ impl Daemon {
 
     pub(crate) fn estimate_fee(&self, nblocks: u16) -> Result<Option<Amount>> {
         let res = self.rpc.estimate_smart_fee(nblocks, None);
-        if let Err(bitcoincore_rpc::Error::JsonRpc(jsonrpc::Error::Rpc(RpcError {
+        if let Err(satsnet_rpc::Error::JsonRpc(jsonrpc::Error::Rpc(RpcError {
             code: -32603,
             ..
         }))) = res
@@ -192,7 +192,7 @@ impl Daemon {
         txid: &Txid,
         blockhash: Option<BlockHash>,
     ) -> Result<Value> {
-        use bitcoin::consensus::serde::{hex::Lower, Hex, With};
+        use satsnet::consensus::serde::{hex::Lower, Hex, With};
 
         let tx = self.get_transaction(txid, blockhash)?;
         #[derive(serde::Serialize)]
@@ -298,10 +298,10 @@ impl Daemon {
     }
 }
 
-pub(crate) type RpcError = bitcoincore_rpc::jsonrpc::error::RpcError;
+pub(crate) type RpcError = satsnet_rpc::jsonrpc::error::RpcError;
 
-pub(crate) fn extract_bitcoind_error(err: &bitcoincore_rpc::Error) -> Option<&RpcError> {
-    use bitcoincore_rpc::{
+pub(crate) fn extract_bitcoind_error(err: &satsnet_rpc::Error) -> Option<&RpcError> {
+    use satsnet_rpc::{
         jsonrpc::error::Error::Rpc as ServerError, Error::JsonRpc as JsonRpcError,
     };
     match err {

@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
-use bitcoin::blockdata::block::Header as BlockHeader;
-use bitcoin::consensus::Encodable;
-use bitcoin::{
+use satsnet::blockdata::block::Header as BlockHeader;
+use satsnet::consensus::Encodable;
+use satsnet::{
     consensus::{
         encode::{self, ReadExt, VarInt},
         Decodable,
@@ -17,7 +17,7 @@ use bitcoin::{
     secp256k1::{self, rand::Rng},
     Block, BlockHash, Network,
 };
-use bitcoin_slices::{bsl, Parse};
+use satsnet_slices::{bsl, Parse};
 use crossbeam_channel::{bounded, select, Receiver, Sender};
 
 use std::io::Write;
@@ -390,7 +390,7 @@ enum ParsedNetworkMessage {
 }
 
 impl Decodable for RawNetworkMessage {
-    fn consensus_decode<D: bitcoin::io::BufRead + ?Sized>(
+    fn consensus_decode<D: satsnet::io::BufRead + ?Sized>(
         d: &mut D,
     ) -> Result<Self, encode::Error> {
         let magic = Decodable::consensus_decode(d)?;

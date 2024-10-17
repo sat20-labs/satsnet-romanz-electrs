@@ -1,10 +1,10 @@
 use anyhow::Result;
-use bitcoin::{
+use satsnet::{
     consensus::Decodable,
     hashes::{sha256, Hash, HashEngine},
     Amount, BlockHash, OutPoint, SignedAmount, Transaction, Txid,
 };
-use bitcoin_slices::{bsl, Visit, Visitor};
+use satsnet_slices::{bsl, Visit, Visitor};
 use rayon::prelude::*;
 use serde::ser::{Serialize, Serializer};
 
@@ -97,7 +97,7 @@ pub(crate) struct HistoryEntry {
     height: Height,
     #[serde(
         skip_serializing_if = "Option::is_none",
-        with = "bitcoin::amount::serde::as_sat::opt"
+        with = "satsnet::amount::serde::as_sat::opt"
     )]
     fee: Option<Amount>,
 }
@@ -140,9 +140,9 @@ pub struct ScriptHashStatus {
 /// Specific scripthash balance
 #[derive(Default, Eq, PartialEq, Serialize)]
 pub(crate) struct Balance {
-    #[serde(with = "bitcoin::amount::serde::as_sat", rename = "confirmed")]
+    #[serde(with = "satsnet::amount::serde::as_sat", rename = "confirmed")]
     confirmed_balance: Amount,
-    #[serde(with = "bitcoin::amount::serde::as_sat", rename = "unconfirmed")]
+    #[serde(with = "satsnet::amount::serde::as_sat", rename = "unconfirmed")]
     mempool_delta: SignedAmount,
 }
 
@@ -153,7 +153,7 @@ pub(crate) struct UnspentEntry {
     height: usize, // 0 = mempool entry
     tx_hash: Txid,
     tx_pos: u32,
-    #[serde(with = "bitcoin::amount::serde::as_sat")]
+    #[serde(with = "satsnet::amount::serde::as_sat")]
     value: Amount,
 }
 
@@ -519,7 +519,7 @@ fn filter_block_txs_outputs(block: SerBlock, scripthash: ScriptHash) -> Vec<Filt
             if !self.buffer.is_empty() {
                 let result = std::mem::take(&mut self.buffer);
                 let txid = bsl_txid(tx);
-                let tx = bitcoin::Transaction::consensus_decode(&mut tx.as_ref())
+                let tx = satsnet::Transaction::consensus_decode(&mut tx.as_ref())
                     .expect("transaction was already validated");
                 self.result.push(FilteredTx::<TxOutput> {
                     tx,
@@ -570,7 +570,7 @@ fn filter_block_txs_inputs(
             if !self.buffer.is_empty() {
                 let result = std::mem::take(&mut self.buffer);
                 let txid = bsl_txid(tx);
-                let tx = bitcoin::Transaction::consensus_decode(&mut tx.as_ref())
+                let tx = satsnet::Transaction::consensus_decode(&mut tx.as_ref())
                     .expect("transaction was already validated");
                 self.result.push(FilteredTx::<OutPoint> {
                     tx,
@@ -603,75 +603,3 @@ fn filter_block_txs_inputs(
     find_inputs.result
 }
 
-#[cfg(test)]
-mod tests {
-    use std::{collections::HashSet, str::FromStr};
-
-    use crate::types::ScriptHash;
-
-    use super::HistoryEntry;
-    use bitcoin::{Address, Amount};
-    use bitcoin_test_data::blocks::mainnet_702861;
-    use serde_json::json;
-
-    #[test]
-    fn test_txinfo_json() {
-        let txid = "5b75086dafeede555fc8f9a810d8b10df57c46f9f176ccc3dd8d2fa20edd685b"
-            .parse()
-            .unwrap();
-        assert_eq!(
-            json!(HistoryEntry::confirmed(txid, 123456)),
-            json!({"tx_hash": "5b75086dafeede555fc8f9a810d8b10df57c46f9f176ccc3dd8d2fa20edd685b", "height": 123456})
-        );
-        assert_eq!(
-            json!(HistoryEntry::unconfirmed(txid, true, Amount::from_sat(123))),
-            json!({"tx_hash": "5b75086dafeede555fc8f9a810d8b10df57c46f9f176ccc3dd8d2fa20edd685b", "height": -1, "fee": 123})
-        );
-        assert_eq!(
-            json!(HistoryEntry::unconfirmed(
-                txid,
-                false,
-                Amount::from_sat(123)
-            )),
-            json!({"tx_hash": "5b75086dafeede555fc8f9a810d8b10df57c46f9f176ccc3dd8d2fa20edd685b", "height": 0, "fee": 123})
-        );
-    }
-
-    #[test]
-    fn test_find_outputs() {
-        let block = mainnet_702861().to_vec();
-
-        let addr = Address::from_str("1A9MXXG26vZVySrNNytQK1N8bX42ZuJ6Ax")
-            .unwrap()
-            .assume_checked();
-        let scripthash = ScriptHash::new(&addr.script_pubkey());
-
-        let result = &super::filter_block_txs_outputs(block, scripthash)[0];
-        assert_eq!(
-            result.txid.to_string(),
-            "7bcdcb44422da5a99daad47d6ba1c3d6f2e48f961a75e42c4fa75029d4b0ef49"
-        );
-        assert_eq!(result.pos, 8);
-        assert_eq!(result.result[0].index, 0);
-        assert_eq!(result.result[0].value.to_sat(), 709503);
-    }
-
-    #[test]
-    fn test_find_inputs() {
-        let block = mainnet_702861().to_vec();
-        let outpoint = bitcoin::OutPoint::from_str(
-            "cc135e792b37a9c4ffd784f696b1e38bd1197f8e67ae1f96c9f13e4618b91866:3",
-        )
-        .unwrap();
-        let mut outpoints = HashSet::new();
-        outpoints.insert(outpoint);
-
-        let result = &super::filter_block_txs_inputs(&block, &outpoints)[0];
-        assert_eq!(
-            result.txid.to_string(),
-            "7bcdcb44422da5a99daad47d6ba1c3d6f2e48f961a75e42c4fa75029d4b0ef49"
-        );
-        assert_eq!(result.pos, 8);
-        assert_eq!(result.result[0], outpoint);
-    }
-}

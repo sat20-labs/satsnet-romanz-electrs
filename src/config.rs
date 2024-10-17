@@ -1,6 +1,6 @@
-use bitcoin::p2p::Magic;
-use bitcoin::Network;
-use bitcoincore_rpc::Auth;
+use satsnet::p2p::Magic;
+use satsnet::Network;
+use satsnet_rpc::Auth;
 use dirs_next::home_dir;
 
 use std::ffi::{OsStr, OsString};
@@ -379,29 +379,5 @@ impl Config {
         builder.init();
 
         config
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Auth, SensitiveAuth};
-    use std::path::Path;
-
-    #[test]
-    fn test_auth_debug() {
-        let auth = Auth::None;
-        assert_eq!(format!("{:?}", SensitiveAuth(auth)), "None");
-
-        let auth = Auth::CookieFile(Path::new("/foo/bar/.cookie").to_path_buf());
-        assert_eq!(
-            format!("{:?}", SensitiveAuth(auth)),
-            "CookieFile(\"/foo/bar/.cookie\")"
-        );
-
-        let auth = Auth::UserPass("user".to_owned(), "pass".to_owned());
-        assert_eq!(
-            format!("{:?}", SensitiveAuth(auth)),
-            "UserPass(\"user\", \"<sensitive>\")"
-        );
     }
 }

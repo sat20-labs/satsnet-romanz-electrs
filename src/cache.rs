@@ -1,4 +1,4 @@
-use bitcoin::{Transaction, Txid};
+use satsnet::{Transaction, Txid};
 use parking_lot::RwLock;
 
 use std::collections::HashMap;
