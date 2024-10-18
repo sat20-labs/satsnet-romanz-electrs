@@ -22,9 +22,9 @@ spec = "internal/config_specification.toml"
 
 [dependencies]
 anyhow = "1.0"
-satsnet = { version = "0.32.3", features = ["serde", "rand-std"] }
+satsnet = { version = "0.32.8", features = ["serde", "rand-std"] }
 satsnet_slices = { version = "0.9", features = ["satsnet", "sha2"] }
-satsnet-rpc = { version = "0.19.1" }
+satsnet-rpc = { path="/Users/chenwenjie/test/rust-satsnet-rpc/client", version = "0.19.1" }
 configure_me = "0.4"
 crossbeam-channel = "0.5"
 dirs-next = "2.0"

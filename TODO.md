@@ -12,3 +12,7 @@
 # Performance
 
 * Consider https://github.com/facebook/rocksdb/wiki/RocksDB-Tuning-Guide#difference-of-spinning-disk
+
+# satsnet
+1 需要加入证书，https的支持，现在SATSNET-RPC报错，应该是要加 HTTPS和证书支持，调试github.com/sat20-labs/rust-satsnet-rpc
+match client.get_blockchain_info() {

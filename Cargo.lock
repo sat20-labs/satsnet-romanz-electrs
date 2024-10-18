@@ -876,9 +876,9 @@ checksum = "f98d2aa92eebf49b69786be48e4477826b256916e84a57ff2a4f21923b48eb4c"
 
 [[package]]
 name = "satsnet"
-version = "0.32.3"
+version = "0.32.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c2fce1a5eae56d62f643a179dba303ebc6cca5a66bbc733011fd74617414e7d"
+checksum = "56ef43dfb47658cb452ee5baf77f933ef2049955aee4681ca2982b007b9861f4"
 dependencies = [
  "bech32",
  "hex-conservative",
@@ -920,8 +920,6 @@ checksum = "6ae57bf7d7567957a15baf3270f55b10aec70dd2043b6f8b598a7dca549330fe"
 [[package]]
 name = "satsnet-rpc"
 version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e618378791df3c8addd0dd7668a2671f0bb0ce819f091281038ad13047327353"
 dependencies = [
  "jsonrpc",
  "log",
@@ -933,8 +931,6 @@ dependencies = [
 [[package]]
 name = "satsnet-rpc-json"
 version = "0.19.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1eea070e0d437c329c79b94e3e0be96a8b31a230a916c227cf142934a1beacc2"
 dependencies = [
  "satsnet",
  "serde",

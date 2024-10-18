@@ -79,8 +79,12 @@ impl Connection {
             None => return Ok(vec![]),
             Some(first) => first.prev_blockhash,
         };
+        println!("prev_blockhash: {}", prev_blockhash);
         let new_heights = match chain.get_block_height(&prev_blockhash) {
-            Some(last_height) => (last_height + 1)..,
+            Some(last_height) => {
+                // println!("last_height: {}", last_height);
+                (last_height + 1)..
+            },
             None => bail!("missing prev_blockhash: {}", prev_blockhash),
         };
         Ok(headers

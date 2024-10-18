@@ -207,6 +207,7 @@ impl Config {
             Network::Testnet => "testnet",
             Network::Regtest => "regtest",
             Network::Signet => "signet",
+            Network::Testnet4 => "testnet4",
             unsupported => unsupported_network(unsupported),
         };
 
@@ -217,6 +218,7 @@ impl Config {
             Network::Testnet => 18332,
             Network::Regtest => 18443,
             Network::Signet => 38332,
+            Network::Testnet4 => 28332,
             unsupported => unsupported_network(unsupported),
         };
         let default_daemon_p2p_port = match config.network {
@@ -224,6 +226,7 @@ impl Config {
             Network::Testnet => 18333,
             Network::Regtest => 18444,
             Network::Signet => 38333,
+            Network::Testnet4 => 28333,
             unsupported => unsupported_network(unsupported),
         };
         let default_electrum_port = match config.network {
@@ -231,6 +234,7 @@ impl Config {
             Network::Testnet => 60001,
             Network::Regtest => 60401,
             Network::Signet => 60601,
+            Network::Testnet4 => 60501,
             unsupported => unsupported_network(unsupported),
         };
         let default_monitoring_port = match config.network {
@@ -238,6 +242,7 @@ impl Config {
             Network::Testnet => 14224,
             Network::Regtest => 24224,
             Network::Signet => 34224,
+            Network::Testnet4 => 44224,
             unsupported => unsupported_network(unsupported),
         };
 
@@ -285,6 +290,7 @@ impl Config {
             Network::Testnet => config.daemon_dir.push("testnet3"),
             Network::Regtest => config.daemon_dir.push("regtest"),
             Network::Signet => config.daemon_dir.push("signet"),
+            Network::Testnet4 => config.daemon_dir.push("testnet4"),
             unsupported => unsupported_network(unsupported),
         }
 

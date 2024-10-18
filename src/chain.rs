@@ -38,6 +38,7 @@ impl Chain {
     // create an empty chain
     pub fn new(network: Network) -> Self {
         let genesis = satsnet::blockdata::constants::genesis_block(network);
+        // println!("Genesis hash: {}", genesis.block_hash());
         let genesis_hash = genesis.block_hash();
         Self {
             headers: vec![(genesis_hash, genesis.header)],
@@ -89,6 +90,9 @@ impl Chain {
 
     /// Get the block height given the specified hash (if exists)
     pub(crate) fn get_block_height(&self, blockhash: &BlockHash) -> Option<usize> {
+        // for (key, value) in self.heights.iter() {
+        //     println!("BlockHash: {}, Height: {}", key, value);
+        // }
         self.heights.get(blockhash).copied()
     }
 
