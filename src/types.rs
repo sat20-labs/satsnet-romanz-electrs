@@ -2,13 +2,13 @@ use anyhow::Result;
 
 use std::convert::TryFrom;
 
-use satsnet::blockdata::block::Header as BlockHeader;
-use satsnet::{
+use bitcoin::blockdata::block::Header as BlockHeader;
+use bitcoin::{
     consensus::encode::{deserialize, Decodable, Encodable},
     hashes::{hash_newtype, sha256, Hash},
     io, OutPoint, Script, Txid,
 };
-use satsnet_slices::bsl;
+use bitcoin_slices::bsl;
 
 macro_rules! impl_consensus_encoding {
     ($thing:ident, $($field:ident),+) => (
@@ -26,9 +26,9 @@ macro_rules! impl_consensus_encoding {
 
         impl Decodable for $thing {
             #[inline]
-            fn consensus_decode<D: io::BufRead + ?Sized>(
+            fn consensus_decode<D: io::Read + ?Sized>(
                 d: &mut D,
-            ) -> Result<$thing, satsnet::consensus::encode::Error> {
+            ) -> Result<$thing, bitcoin::consensus::encode::Error> {
                 Ok($thing {
                     $($field: Decodable::consensus_decode(d)?),+
                 })
@@ -194,5 +194,99 @@ impl HeaderRow {
 }
 
 pub(crate) fn bsl_txid(tx: &bsl::Transaction) -> Txid {
-    satsnet::Txid::from_slice(tx.txid_sha2().as_slice()).expect("invalid txid")
+    bitcoin::Txid::from_slice(tx.txid_sha2().as_slice()).expect("invalid txid")
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::types::{spending_prefix, HashPrefixRow, ScriptHash, ScriptHashRow, TxidRow};
+    use bitcoin::{Address, OutPoint, Txid};
+    use hex_lit::hex;
+    use serde_json::{from_str, json};
+
+    use std::str::FromStr;
+
+    #[test]
+    fn test_scripthash_serde() {
+        let hex = "\"4b3d912c1523ece4615e91bf0d27381ca72169dbf6b1c2ffcc9f92381d4984a3\"";
+        let scripthash: ScriptHash = from_str(hex).unwrap();
+        assert_eq!(format!("\"{}\"", scripthash), hex);
+        assert_eq!(json!(scripthash).to_string(), hex);
+    }
+
+    #[test]
+    fn test_scripthash_row() {
+        let hex = "\"4b3d912c1523ece4615e91bf0d27381ca72169dbf6b1c2ffcc9f92381d4984a3\"";
+        let scripthash: ScriptHash = from_str(hex).unwrap();
+        let row1 = ScriptHashRow::row(scripthash, 123456);
+        let db_row = row1.to_db_row();
+        assert_eq!(db_row, hex!("a384491d38929fcc40e20100"));
+        let row2 = HashPrefixRow::from_db_row(db_row);
+        assert_eq!(row1, row2);
+    }
+
+    #[test]
+    fn test_scripthash() {
+        let addr = Address::from_str("1KVNjD3AAnQ3gTMqoTKcWFeqSFujq9gTBT")
+            .unwrap()
+            .assume_checked();
+        let scripthash = ScriptHash::new(&addr.script_pubkey());
+        assert_eq!(
+            scripthash,
+            "00dfb264221d07712a144bda338e89237d1abd2db4086057573895ea2659766a"
+                .parse()
+                .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_txid1_prefix() {
+        // duplicate txids from BIP-30
+        let hex = "d5d27987d2a3dfc724e359870c6644b40e497bdc0589a033220fe15429d88599";
+        let txid = Txid::from_str(hex).unwrap();
+
+        let row1 = TxidRow::row(txid, 91812);
+        let row2 = TxidRow::row(txid, 91842);
+
+        assert_eq!(row1.to_db_row(), hex!("9985d82954e10f22a4660100"));
+        assert_eq!(row2.to_db_row(), hex!("9985d82954e10f22c2660100"));
+    }
+
+    #[test]
+    fn test_txid2_prefix() {
+        // duplicate txids from BIP-30
+        let hex = "e3bf3d07d4b0375638d5f1db5255fe07ba2c4cb067cd81b84ee974b6585fb468";
+        let txid = Txid::from_str(hex).unwrap();
+
+        let row1 = TxidRow::row(txid, 91722);
+        let row2 = TxidRow::row(txid, 91880);
+
+        // low-endian encoding => rows should be sorted according to block height
+        assert_eq!(row1.to_db_row(), hex!("68b45f58b674e94e4a660100"));
+        assert_eq!(row2.to_db_row(), hex!("68b45f58b674e94ee8660100"));
+    }
+
+    #[test]
+    fn test_spending_prefix() {
+        let txid = "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+            .parse()
+            .unwrap();
+
+        assert_eq!(
+            spending_prefix(OutPoint { txid, vout: 0 }),
+            [31, 30, 29, 28, 27, 26, 25, 24]
+        );
+        assert_eq!(
+            spending_prefix(OutPoint { txid, vout: 10 }),
+            [31, 30, 29, 28, 27, 26, 25, 34]
+        );
+        assert_eq!(
+            spending_prefix(OutPoint { txid, vout: 255 }),
+            [31, 30, 29, 28, 27, 26, 26, 23]
+        );
+        assert_eq!(
+            spending_prefix(OutPoint { txid, vout: 256 }),
+            [31, 30, 29, 28, 27, 26, 26, 24]
+        );
+    }
 }

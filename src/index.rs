@@ -1,8 +1,8 @@
 use anyhow::{Context, Result};
-use satsnet::consensus::{deserialize, Decodable, Encodable};
-use satsnet::hashes::Hash;
-use satsnet::{BlockHash, OutPoint, Txid};
-use satsnet_slices::{bsl, Visit, Visitor};
+use bitcoin::consensus::{deserialize, Decodable, Encodable};
+use bitcoin::hashes::Hash;
+use bitcoin::{BlockHash, OutPoint, Txid};
+use bitcoin_slices::{bsl, Visit, Visitor};
 use std::ops::ControlFlow;
 
 use crate::{
@@ -256,7 +256,7 @@ fn index_single_block(
         }
 
         fn visit_tx_out(&mut self, _vout: usize, tx_out: &bsl::TxOut) -> ControlFlow<()> {
-            let script = satsnet::Script::from_bytes(tx_out.script_pubkey());
+            let script = bitcoin::Script::from_bytes(tx_out.script_pubkey());
             // skip indexing unspendable outputs
             if !script.is_op_return() {
                 let row = ScriptHashRow::row(ScriptHash::new(script), self.height);
@@ -276,7 +276,7 @@ fn index_single_block(
         }
 
         fn visit_block_header(&mut self, header: &bsl::BlockHeader) -> ControlFlow<()> {
-            let header = satsnet::block::Header::consensus_decode(&mut header.as_ref())
+            let header = bitcoin::block::Header::consensus_decode(&mut header.as_ref())
                 .expect("block header was already validated");
             self.batch
                 .header_rows

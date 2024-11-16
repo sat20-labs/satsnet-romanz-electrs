@@ -1,5 +1,5 @@
 use anyhow::{bail, Context, Result};
-use satsnet::{
+use bitcoin::{
     consensus::{deserialize, encode::serialize_hex},
     hashes::hex::FromHex,
     BlockHash, Txid,
@@ -650,7 +650,7 @@ impl Call {
             Err(err) => {
                 warn!("RPC {} failed: {:#}", self.method, err);
                 match err
-                    .downcast_ref::<satsnet_rpc::Error>()
+                    .downcast_ref::<bitcoincore_rpc::Error>()
                     .and_then(extract_bitcoind_error)
                 {
                     Some(e) => error_msg(&self.id, RpcError::DaemonError(e.clone())),
@@ -756,4 +756,31 @@ fn check_between(version_str: &str, min_str: &str, max_str: &str) -> Result<()> 
         bail!("version {} > {}", version, max);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{check_between, parse_version, Version};
+
+    #[test]
+    fn test_version() {
+        assert_eq!(parse_version("1").unwrap(), Version(vec![1]));
+        assert_eq!(parse_version("1.2").unwrap(), Version(vec![1, 2]));
+        assert_eq!(parse_version("1.2.345").unwrap(), Version(vec![1, 2, 345]));
+
+        assert!(parse_version("1.2").unwrap() < parse_version("1.100").unwrap());
+    }
+
+    #[test]
+    fn test_between() {
+        assert!(check_between("1.4", "1.4", "1.4").is_ok());
+        assert!(check_between("1.4", "1.4", "1.5").is_ok());
+        assert!(check_between("1.4", "1.3", "1.4").is_ok());
+        assert!(check_between("1.4", "1.3", "1.5").is_ok());
+
+        assert!(check_between("1.4", "1.5", "1.5").is_err());
+        assert!(check_between("1.4", "1.3", "1.3").is_err());
+        assert!(check_between("1.4", "1.4.1", "1.5").is_err());
+        assert!(check_between("1.4", "1", "1").is_err());
+    }
 }

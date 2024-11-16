@@ -422,3 +422,117 @@ impl Drop for DBStore {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::{rocksdb, DBStore, WriteBatch, CURRENT_FORMAT};
+    use std::ffi::{OsStr, OsString};
+    use std::path::Path;
+
+    #[test]
+    fn test_reindex_new_format() {
+        let dir = tempfile::tempdir().unwrap();
+        {
+            let store = DBStore::open(dir.path(), None, false).unwrap();
+            let mut config = store.get_config().unwrap();
+            config.format += 1;
+            store.set_config(config);
+        };
+        assert_eq!(
+            DBStore::open(dir.path(), None, false)
+                .err()
+                .unwrap()
+                .to_string(),
+            format!(
+                "re-index required due to unsupported format {} != {}",
+                CURRENT_FORMAT + 1,
+                CURRENT_FORMAT
+            )
+        );
+        {
+            let store = DBStore::open(dir.path(), None, true).unwrap();
+            store.flush();
+            let config = store.get_config().unwrap();
+            assert_eq!(config.format, CURRENT_FORMAT);
+            assert!(!store.is_legacy_format());
+        }
+    }
+
+    #[test]
+    fn test_reindex_legacy_format() {
+        let dir = tempfile::tempdir().unwrap();
+        {
+            let mut db_opts = rocksdb::Options::default();
+            db_opts.create_if_missing(true);
+            let db = rocksdb::DB::open(&db_opts, dir.path()).unwrap();
+            db.put(b"F", b"").unwrap(); // insert legacy DB compaction marker (in 'default' column family)
+        };
+        assert_eq!(
+            DBStore::open(dir.path(), None, false)
+                .err()
+                .unwrap()
+                .to_string(),
+            format!("re-index required due to legacy format",)
+        );
+        {
+            let store = DBStore::open(dir.path(), None, true).unwrap();
+            store.flush();
+            let config = store.get_config().unwrap();
+            assert_eq!(config.format, CURRENT_FORMAT);
+        }
+    }
+
+    #[test]
+    fn test_db_prefix_scan() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = DBStore::open(dir.path(), None, true).unwrap();
+
+        let items = [
+            *b"ab          ",
+            *b"abcdefgh    ",
+            *b"abcdefghj   ",
+            *b"abcdefghjk  ",
+            *b"abcdefghxyz ",
+            *b"abcdefgi    ",
+            *b"b           ",
+            *b"c           ",
+        ];
+
+        store.write(&WriteBatch {
+            txid_rows: items.to_vec(),
+            ..Default::default()
+        });
+
+        let rows = store.iter_txid(*b"abcdefgh");
+        assert_eq!(rows.collect::<Vec<_>>(), items[1..5]);
+    }
+
+    #[test]
+    fn test_db_log_in_same_dir() {
+        let dir1 = tempfile::tempdir().unwrap();
+        let _store = DBStore::open(dir1.path(), None, true).unwrap();
+
+        // LOG file is created in dir1
+        let dir_files = list_log_files(dir1.path());
+        assert_eq!(dir_files, vec![OsStr::new("LOG")]);
+
+        let dir2 = tempfile::tempdir().unwrap();
+        let dir3 = tempfile::tempdir().unwrap();
+        let _store = DBStore::open(dir2.path(), Some(dir3.path()), true).unwrap();
+
+        // *_LOG file is not created in dir2, but in dir3
+        let dir_files = list_log_files(dir2.path());
+        assert_eq!(dir_files, Vec::<OsString>::new());
+
+        let dir_files = list_log_files(dir3.path());
+        assert_eq!(dir_files.len(), 1);
+        assert!(dir_files[0].to_str().unwrap().ends_with("_LOG"));
+    }
+
+    fn list_log_files(path: &Path) -> Vec<OsString> {
+        path.read_dir()
+            .unwrap()
+            .map(|e| e.unwrap().file_name())
+            .filter(|e| e.to_str().unwrap().contains("LOG"))
+            .collect()
+    }
+}

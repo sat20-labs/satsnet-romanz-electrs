@@ -5,8 +5,8 @@ use std::convert::TryFrom;
 use std::iter::FromIterator;
 use std::ops::Bound;
 
-use satsnet::hashes::Hash;
-use satsnet::{Amount, OutPoint, Transaction, Txid};
+use bitcoin::hashes::Hash;
+use bitcoin::{Amount, OutPoint, Transaction, Txid};
 use serde::ser::{Serialize, SerializeSeq, Serializer};
 
 use crate::{
@@ -85,14 +85,14 @@ impl MempoolSyncUpdate {
                     let entry = match entry {
                         Some(entry) => entry,
                         None => {
-                            warn!("missing mempool entry: {}", txid);
+                            debug!("missing mempool entry: {}", txid);
                             return None;
                         }
                     };
                     let tx = match tx {
                         Some(tx) => tx,
                         None => {
-                            warn!("missing mempool tx: {}", txid);
+                            debug!("missing mempool tx: {}", txid);
                             return None;
                         }
                     };
@@ -365,3 +365,69 @@ impl Serialize for FeeHistogram {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::FeeHistogram;
+    use bitcoin::Amount;
+    use serde_json::json;
+
+    #[test]
+    fn test_histogram() {
+        let items = vec![
+            (Amount::from_sat(20), 10),
+            (Amount::from_sat(10), 10),
+            (Amount::from_sat(60), 10),
+            (Amount::from_sat(30), 10),
+            (Amount::from_sat(70), 10),
+            (Amount::from_sat(50), 10),
+            (Amount::from_sat(40), 10),
+            (Amount::from_sat(80), 10),
+            (Amount::from_sat(1), 100),
+        ];
+        let mut hist = FeeHistogram::default();
+        for (amount, vsize) in items {
+            let bin_index = FeeHistogram::bin_index(amount, vsize);
+            hist.insert(bin_index, vsize);
+        }
+        assert_eq!(
+            json!(hist),
+            json!([[15, 10], [7, 40], [3, 20], [1, 10], [0, 100]])
+        );
+
+        {
+            let bin_index = FeeHistogram::bin_index(Amount::from_sat(5), 1); // 5 sat/byte
+            hist.remove(bin_index, 11);
+            assert_eq!(
+                json!(hist),
+                json!([[15, 10], [7, 29], [3, 20], [1, 10], [0, 100]])
+            );
+        }
+
+        {
+            let bin_index = FeeHistogram::bin_index(Amount::from_sat(13), 1); // 13 sat/byte
+            hist.insert(bin_index, 80);
+            assert_eq!(
+                json!(hist),
+                json!([[15, 90], [7, 29], [3, 20], [1, 10], [0, 100]])
+            );
+        }
+
+        {
+            let bin_index = FeeHistogram::bin_index(Amount::from_sat(99), 1); // 99 sat/byte
+            hist.insert(bin_index, 15);
+            assert_eq!(
+                json!(hist),
+                json!([
+                    [127, 15],
+                    [63, 0],
+                    [31, 0],
+                    [15, 90],
+                    [7, 29],
+                    [3, 20],
+                    [1, 10],
+                    [0, 100]
+                ])
+            );
+        }
+    }
+}

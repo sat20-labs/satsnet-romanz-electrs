@@ -1,12 +1,12 @@
 [package]
 name = "electrs"
-version = "0.10.6"
-authors = ["Roman Zeyde <me@romanzey.de>"]
+version = "0.10.7"
+authors = ["Jacky Chen <softwarecheng@gmail.com>"]
 description = "An efficient re-implementation of Electrum Server in Rust"
 license = "MIT"
-homepage = "https://github.com/romanz/electrs"
-repository = "https://github.com/romanz/electrs"
-keywords = ["bitcoin", "electrum", "satsnet", "index", "database"]
+homepage = "https://github.com/sat20-labs/satsnet-romanz-electrs"
+repository = "https://github.com/sat20-labs/satsnet-romanz-electrs"
+keywords = ["bitcoin", "electrum", "server", "index", "satsnet"]
 documentation = "https://docs.rs/electrs/"
 readme = "README.md"
 edition = "2021"
@@ -22,9 +22,11 @@ spec = "internal/config_specification.toml"
 
 [dependencies]
 anyhow = "1.0"
-satsnet = { version = "0.32.8", features = ["serde", "rand-std"] }
-satsnet_slices = { version = "0.9", features = ["satsnet", "sha2"] }
-satsnet-rpc = { path="/Users/chenwenjie/test/rust-satsnet-rpc/client", version = "0.19.1" }
+bitcoin = { package = "satsnet", version = "0.32.11", features = ["serde", "rand-std", "satsnet"] }
+# bitcoin_slices = { package = "satsnet_slices", version = "0.9.1", features = ["bitcoin", "sha2"] }
+# bitcoin_slices = { package = "satsnet_slices", path = "/Users/chenwenjie/test/rust/rust_satsnet_slices", version = "0.9.3", features = ["bitcoin_with_satsnet", "sha2",] }
+bitcoin_slices = { package = "satsnet_slices", version = "0.9.3", features = ["bitcoin_with_satsnet", "sha2",] }
+bitcoincore-rpc = { package = "satsnet-rpc", version = "0.19.2" }
 configure_me = "0.4"
 crossbeam-channel = "0.5"
 dirs-next = "2.0"
@@ -34,7 +36,7 @@ parking_lot = "0.12"
 prometheus = { version = "0.13", optional = true }
 rayon = "1.9"
 serde = "1.0"
-serde_derive = "1.0, <=1.0.171"                                      # avoid precompiled binaries (https://github.com/serde-rs/serde/issues/2538)
+serde_derive = "1.0, <=1.0.171"  # avoid precompiled binaries (https://github.com/serde-rs/serde/issues/2538)
 serde_json = "1.0"
 signal-hook = "0.3"
 tiny_http = { version = "0.12", optional = true }
@@ -50,6 +52,10 @@ features = ["zstd", "snappy"]
 [build-dependencies]
 configure_me_codegen = { version = "0.4.8", default-features = false }
 
+[dev-dependencies]
+bitcoin-test-data = "0.2.0"
+hex_lit = "0.1.1"
+tempfile = "3.13"
 
 [profile.release]
 lto = true

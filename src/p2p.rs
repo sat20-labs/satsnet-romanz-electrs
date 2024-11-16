@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
-use satsnet::blockdata::block::Header as BlockHeader;
-use satsnet::consensus::Encodable;
-use satsnet::{
+use bitcoin::blockdata::block::Header as BlockHeader;
+use bitcoin::consensus::Encodable;
+use bitcoin::{
     consensus::{
         encode::{self, ReadExt, VarInt},
         Decodable,
@@ -17,7 +17,7 @@ use satsnet::{
     secp256k1::{self, rand::Rng},
     Block, BlockHash, Network,
 };
-use satsnet_slices::{bsl, Parse};
+use bitcoin_slices::{bsl, Parse};
 use crossbeam_channel::{bounded, select, Receiver, Sender};
 
 use std::io::Write;
@@ -79,12 +79,8 @@ impl Connection {
             None => return Ok(vec![]),
             Some(first) => first.prev_blockhash,
         };
-        println!("prev_blockhash: {}", prev_blockhash);
         let new_heights = match chain.get_block_height(&prev_blockhash) {
-            Some(last_height) => {
-                // println!("last_height: {}", last_height);
-                (last_height + 1)..
-            },
+            Some(last_height) => (last_height + 1)..,
             None => bail!("missing prev_blockhash: {}", prev_blockhash),
         };
         Ok(headers
@@ -394,9 +390,7 @@ enum ParsedNetworkMessage {
 }
 
 impl Decodable for RawNetworkMessage {
-    fn consensus_decode<D: satsnet::io::BufRead + ?Sized>(
-        d: &mut D,
-    ) -> Result<Self, encode::Error> {
+    fn consensus_decode<D: bitcoin::io::Read + ?Sized>(d: &mut D) -> Result<Self, encode::Error> {
         let magic = Decodable::consensus_decode(d)?;
         let cmd = Decodable::consensus_decode(d)?;
 

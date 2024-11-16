@@ -1,6 +1,6 @@
 use anyhow::{Context, Result};
-use satsnet::{BlockHash, Transaction, Txid};
-use satsnet_slices::{
+use bitcoin::{BlockHash, Transaction, Txid};
+use bitcoin_slices::{
     bsl::{self, FindTransaction},
     Error::VisitBreak,
     Visit,
