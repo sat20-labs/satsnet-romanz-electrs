@@ -940,9 +940,9 @@ checksum = "f98d2aa92eebf49b69786be48e4477826b256916e84a57ff2a4f21923b48eb4c"
 
 [[package]]
 name = "satsnet"
-version = "0.32.11"
+version = "0.32.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "702d61aa55c169ba16670c8b618d29fa12bae81dfd4647f4c24dc3b7c99f9fc0"
+checksum = "b61bd3010e33f409f495a21e7bced3bf00b01099b258967ba6c10cefef9d8b48"
 dependencies = [
  "base58ck",
  "bech32",
