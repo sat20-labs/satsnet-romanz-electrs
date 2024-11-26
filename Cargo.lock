@@ -960,6 +960,8 @@ dependencies = [
 [[package]]
 name = "satsnet-rpc"
 version = "0.19.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fe3dd7de41d78cd806de379179def752e720753b5222e54fbe3c5a39201da4ca"
 dependencies = [
  "jsonrpc",
  "log",
@@ -971,6 +973,8 @@ dependencies = [
 [[package]]
 name = "satsnet-rpc-json"
 version = "0.19.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1338431538488870d77e5864ab37f0aac09dd7399a5e64b7f679dc6f5a5430c7"
 dependencies = [
  "satsnet",
  "serde",
