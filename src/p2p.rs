@@ -22,6 +22,7 @@ use crossbeam_channel::{bounded, select, Receiver, Sender};
 
 use std::io::Write;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr, TcpStream};
+use std::ops::RangeFrom;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use crate::types::SerBlock;
@@ -30,6 +31,7 @@ use crate::{
     config::ELECTRS_VERSION,
     metrics::{default_duration_buckets, default_size_buckets, Histogram, Metrics},
 };
+// use hex;
 
 enum Request {
     GetNewHeaders(GetHeadersMessage),
@@ -81,7 +83,8 @@ impl Connection {
         };
         let new_heights = match chain.get_block_height(&prev_blockhash) {
             Some(last_height) => (last_height + 1)..,
-            None => bail!("missing prev_blockhash: {}", prev_blockhash),
+            // None => bail!("missing prev_blockhash: {}", prev_blockhash),
+            None => RangeFrom { start: 0 },
         };
         Ok(headers
             .into_iter()
@@ -109,6 +112,7 @@ impl Connection {
             })?;
 
             for hash in blockhashes {
+                // info!("loading block {}", hash);
                 let block = self.blocks_duration.observe_duration("response", || {
                     let block = self
                         .blocks_recv
@@ -286,7 +290,12 @@ impl Connection {
                         ParsedNetworkMessage::Verack => {
                             init_send.send(())?; // peer acknowledged our version
                         }
-                        ParsedNetworkMessage::Block(block) => blocks_send.send(block)?,
+                        
+                        ParsedNetworkMessage::Block(block) => {
+                            // info!("receive new block for p2p protocol block(GetData) 1: {:?}",block);
+                            // info!("receive new block for p2p protocol block(GetData) 2: {:?}",hex::encode(&block));
+                            blocks_send.send(block)?
+                        },
                         ParsedNetworkMessage::Headers(headers) => headers_send.send(headers)?,
                         ParsedNetworkMessage::Ignored => (),
                     }

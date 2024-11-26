@@ -345,6 +345,7 @@ dependencies = [
  "dirs-next",
  "electrs-rocksdb",
  "env_logger",
+ "hex",
  "hex_lit",
  "log",
  "parking_lot",
@@ -940,9 +941,9 @@ checksum = "f98d2aa92eebf49b69786be48e4477826b256916e84a57ff2a4f21923b48eb4c"
 
 [[package]]
 name = "satsnet"
-version = "0.32.12"
+version = "0.32.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b61bd3010e33f409f495a21e7bced3bf00b01099b258967ba6c10cefef9d8b48"
+checksum = "a921951f973e39ecf73bb1fc0d417aa2893c8ae58b04669c5e22efacf5161ed9"
 dependencies = [
  "base58ck",
  "bech32",
@@ -958,9 +959,7 @@ dependencies = [
 
 [[package]]
 name = "satsnet-rpc"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97bee2b36734f7ddabe2ac05431b310227654d1c8cb022b43fbd1138ccf7041c"
+version = "0.19.3"
 dependencies = [
  "jsonrpc",
  "log",
@@ -971,9 +970,7 @@ dependencies = [
 
 [[package]]
 name = "satsnet-rpc-json"
-version = "0.19.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e7e9e87eaad15273a083a400430b03853563a8219767540143e94829516852b"
+version = "0.19.3"
 dependencies = [
  "satsnet",
  "serde",
@@ -982,9 +979,9 @@ dependencies = [
 
 [[package]]
 name = "satsnet_slices"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98d78134972ebcd8528ff3fdcb202e1dcd02d735c0a00a8a6b8240141c703f4a"
+checksum = "0862d29b4fe51507970bc93455f98890e1a7d7e6da019dab155dadf6ff50b667"
 dependencies = [
  "bitcoin_hashes",
  "rustc-std-workspace-alloc",

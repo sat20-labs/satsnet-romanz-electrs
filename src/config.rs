@@ -113,7 +113,7 @@ impl ::configure_me::parse_arg::ParseArgFromStr for BitcoinNetwork {
     fn describe_type<W: fmt::Write>(mut writer: W) -> fmt::Result {
         write!(
             writer,
-            "either 'bitcoin', 'testnet', 'testnet4', 'regtest' or 'signet'"
+            "either 'bitcoin', 'testnet', 'testnet4', 'satsnet', 'satstestnet', 'regtest' or 'signet'"
         )
     }
 }
@@ -211,6 +211,8 @@ impl Config {
             Network::Testnet4 => "testnet4",
             Network::Regtest => "regtest",
             Network::Signet => "signet",
+            Network::Satsnet => "satsnet",
+            Network::Satstestnet => "satstestnet",
             unsupported => unsupported_network(unsupported),
         };
 
@@ -222,6 +224,8 @@ impl Config {
             Network::Testnet4 => 48332,
             Network::Regtest => 18443,
             Network::Signet => 38332,
+            Network::Satsnet => 4827,
+            Network::Satstestnet => 14827,
             unsupported => unsupported_network(unsupported),
         };
         let default_daemon_p2p_port = match config.network {
@@ -230,6 +234,8 @@ impl Config {
             Network::Testnet4 => 48333,
             Network::Regtest => 18444,
             Network::Signet => 38333,
+            Network::Satsnet => 4826,
+            Network::Satstestnet => 14826,
             unsupported => unsupported_network(unsupported),
         };
         let default_electrum_port = match config.network {
@@ -238,6 +244,8 @@ impl Config {
             Network::Testnet4 => 40001,
             Network::Regtest => 60401,
             Network::Signet => 60601,
+            Network::Satsnet => 20001,
+            Network::Satstestnet => 30001,
             unsupported => unsupported_network(unsupported),
         };
         let default_monitoring_port = match config.network {
@@ -246,6 +254,8 @@ impl Config {
             Network::Testnet4 => 44224,
             Network::Regtest => 24224,
             Network::Signet => 34224,
+            Network::Satsnet => 54224,
+            Network::Satstestnet => 64224,
             unsupported => unsupported_network(unsupported),
         };
 
@@ -294,6 +304,8 @@ impl Config {
             Network::Testnet4 => config.daemon_dir.push("testnet4"),
             Network::Regtest => config.daemon_dir.push("regtest"),
             Network::Signet => config.daemon_dir.push("signet"),
+            Network::Satsnet => config.daemon_dir.push("satsnet"),
+            Network::Satstestnet => config.daemon_dir.push("satstestnet"),
             unsupported => unsupported_network(unsupported),
         }
 

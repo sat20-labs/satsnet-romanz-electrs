@@ -16,21 +16,21 @@
 # testnet4
 # daemon_rpc_addr = "192.168.10.102:28332"
 # satsnet
-daemon_rpc_addr = "192.168.10.104:14827"
+daemon_rpc_addr = "192.168.10.103:14827"
 
 # The listening P2P address of bitcoind, port is usually 8333
 # daemon_p2p_addr = "192.168.10.102:8333"
 # testnet4
 # daemon_p2p_addr = "192.168.10.102:48333"
 # satsnet
-daemon_p2p_addr = "192.168.10.104:14826"
+daemon_p2p_addr = "192.168.10.103:14826"
 
 # Directory where the index should be stored. It should have at least 70GB of free space.
 db_dir = "./db"
 
 # bitcoin means mainnet. Don't set to anything else unless you're a developer.
 # network = "bitcoin"
-network = "testnet4"
+network = "satstestnet"
 
 # The address on which electrs should listen. Warning: 0.0.0.0 is probably a bad idea!
 # Tunneling is the recommended way to access electrs remotely.

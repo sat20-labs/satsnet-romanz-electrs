@@ -34,15 +34,17 @@ fn rpc_poll(client: &mut Client, skip_block_download_wait: bool) -> PollResult {
                 return PollResult::Done(Ok(()));
             }
             let left_blocks = info.headers - info.blocks;
-            if info.initial_block_download || left_blocks > 0 {
+            // if info.initial_block_download || left_blocks > 0 {
+            if  left_blocks > 0 {
                 info!(
-                    "waiting for {} blocks to download{}",
+                    // "waiting for {} blocks to download {}",
+                    "waiting for {} blocks to download",
                     left_blocks,
-                    if info.initial_block_download {
-                        " (IBD)"
-                    } else {
-                        ""
-                    }
+                    // if info.initial_block_download {
+                    //     " (IBD)"
+                    // } else {
+                    //     ""
+                    // }
                 );
                 return PollResult::Retry;
             }
@@ -127,12 +129,13 @@ impl Daemon {
         }
 
         let network_info = rpc.get_network_info()?;
-        if network_info.version < 21_00_00 {
-            bail!("electrs requires bitcoind 0.21+");
+        // if network_info.version < 21_00_00 {
+        if network_info.version < 24_02_00 {
+            bail!("electrs requires satsnet 240200+");
         }
-        if !network_info.network_active {
-            bail!("electrs requires active bitcoind p2p network");
-        }
+        // if !network_info.network_active {
+        //     bail!("electrs requires active bitcoind p2p network");
+        // }
         let info = rpc.get_blockchain_info()?;
         if info.pruned {
             bail!("electrs requires non-pruned bitcoind node");

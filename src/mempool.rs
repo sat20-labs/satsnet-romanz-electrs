@@ -212,7 +212,11 @@ impl Mempool {
 
     pub fn sync(&mut self, daemon: &Daemon, exit_flag: &ExitFlag) {
         let loaded = match daemon.get_mempool_info() {
-            Ok(info) => info.loaded.unwrap_or(true),
+            // Ok(info) => {
+            Ok(_) => {
+                true
+                //info.loaded.unwrap_or(true)
+            },
             Err(e) => {
                 warn!("mempool sync failed: {}", e);
                 return;

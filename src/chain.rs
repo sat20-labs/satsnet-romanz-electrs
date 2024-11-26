@@ -60,16 +60,23 @@ impl Chain {
     pub(crate) fn load(&mut self, headers: impl Iterator<Item = BlockHeader>, tip: BlockHash) {
         let genesis_hash = self.headers[0].0;
 
+        // 22e46d9d7a8e0b648555a084892bd8c0637b931b2ad029b01fe55f851df90dd3
+        let genesis_hash_str = "00000000da84f2bafbbc53dee25a72ae507ff4914b867c565be350b0da8bf043";
+        info!("fact genesis hash: {}, temp genesis hash: {}", genesis_hash, genesis_hash_str);
+        
         let header_map: HashMap<BlockHash, BlockHeader> =
             headers.map(|h| (h.block_hash(), h)).collect();
         let mut blockhash = tip;
+        let mut blockhash_str = blockhash.to_string();
         let mut new_headers: Vec<&BlockHeader> = Vec::with_capacity(header_map.len());
-        while blockhash != genesis_hash {
+        while blockhash_str != genesis_hash_str {
+        // while blockhash != genesis_hash {
             let header = match header_map.get(&blockhash) {
                 Some(header) => header,
                 None => panic!("missing header {} while loading from DB", blockhash),
             };
             blockhash = header.prev_blockhash;
+            blockhash_str = blockhash.to_string();
             new_headers.push(header);
         }
         info!("loading {} headers, tip={}", new_headers.len(), tip);
