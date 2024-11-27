@@ -121,9 +121,10 @@ impl Connection {
                     let header = bsl::BlockHeader::parse(&block[..])
                         .expect("core returned invalid blockheader")
                         .parsed_owned();
+                    hash.to_string();
                     ensure!(
                         &header.block_hash_sha2()[..] == hash.as_byte_array(),
-                        "got unexpected block"
+                        "got unexpected block hash: {}", hash
                     );
                     Ok(block)
                 })?;
