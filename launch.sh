@@ -8,8 +8,6 @@ CONFIG_PATH="/data/github/satsnet-romanz-electrs/config.toml"
 LOG_FILE="/var/log/electrs.log"
 # 定义每次检查的间隔时间（秒）
 WAIT_TIME=30
-# 定义等待进程正常退出的最长时间（秒）
-KILL_TIMEOUT=10
 
 # 函数：启动 electrs 并记录日志
 start_electrs() {
@@ -27,25 +25,10 @@ while true; do
     # 检查是否找到了 electrs 进程
     if [ ! -z "$PID" ]; then
         echo "Found electrs process with PID: $PID"
-        echo "Stopping electrs..."
-        # 尝试正常终止进程
-        kill $PID
-
-        # 等待进程停止，最多等待 KILL_TIMEOUT 秒
-        for ((i=0; i<KILL_TIMEOUT; i++)); do
-            if ! kill -0 $PID 2>/dev/null; then
-                echo "electrs stopped"
-                break
-            fi
-            sleep 1
-        done
-
-        # 如果进程仍然存在，强制 KILL
-        if kill -0 $PID 2>/dev/null; then
-            echo "electrs did not stop gracefully. Force killing..."
-            kill -9 $PID
-            sleep 1
-        fi
+        echo "Forcefully stopping electrs..."
+        # 直接使用 KILL -9 强制终止进程
+        kill -9 $PID
+        sleep 1  # 短暂等待，确保系统有时间处理终止的进程
 
         # 重新启动 electrs
         start_electrs
