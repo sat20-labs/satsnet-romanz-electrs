@@ -121,13 +121,11 @@ impl Connection {
                     let header = bsl::BlockHeader::parse(&block[..])
                         .expect("core returned invalid blockheader")
                         .parsed_owned();
-                    // TODO: satsnet
-                    // ensure!(
-                    //     &header.block_hash_sha2()[..] == hash.as_byte_array(),
-                    //     "got unexpected block debug"
-                    // );
-                    // Ok(block)
-                    Ok(block) as Result<SerBlock, anyhow::Error>
+                    ensure!(
+                        &header.block_hash_sha2()[..] == hash.as_byte_array(),
+                        "got unexpected block"
+                    );
+                    Ok(block)
                 })?;
                 self.blocks_duration
                     .observe_duration("process", || func(hash, block));
