@@ -123,7 +123,7 @@ impl Connection {
                         .parsed_owned();
                     ensure!(
                         &header.block_hash_sha2()[..] == hash.as_byte_array(),
-                        "got unexpected block"
+                        "got unexpected block debug"
                     );
                     Ok(block)
                 })?;
