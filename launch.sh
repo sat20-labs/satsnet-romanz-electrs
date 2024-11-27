@@ -17,10 +17,15 @@ start_electrs() {
     echo "electrs started with PID $!"
 }
 
+# 函数：获取 electrs 进程的 PID
+get_electrs_pid() {
+    pgrep -f "$ELECTRS_PATH"
+}
+
 # 无限循环，持续运行脚本
 while true; do
     # 获取 electrs 进程的 PID
-    PID=$(ps aux | grep "[${ELECTRS_PATH}]" | awk '{print $2}')
+    PID=$(get_electrs_pid)
 
     # 检查是否找到了 electrs 进程
     if [ ! -z "$PID" ]; then
@@ -29,6 +34,15 @@ while true; do
         # 直接使用 KILL -9 强制终止进程
         kill -9 $PID
         sleep 1  # 短暂等待，确保系统有时间处理终止的进程
+
+        # 再次检查进程是否真的被终止
+        if [ -z "$(get_electrs_pid)" ]; then
+            echo "electrs successfully terminated"
+        else
+            echo "Failed to terminate electrs, retrying..."
+            kill -9 $(get_electrs_pid)
+            sleep 1
+        fi
 
         # 重新启动 electrs
         start_electrs
