@@ -16,14 +16,14 @@
 # testnet4
 # daemon_rpc_addr = "192.168.10.102:28332"
 # satsnet
-daemon_rpc_addr = "192.168.10.103:14827"
+daemon_rpc_addr = "192.168.10.103:15827"
 
 # The listening P2P address of bitcoind, port is usually 8333
 # daemon_p2p_addr = "192.168.10.102:8333"
 # testnet4
 # daemon_p2p_addr = "192.168.10.102:48333"
 # satsnet
-daemon_p2p_addr = "192.168.10.103:14826"
+daemon_p2p_addr = "192.168.10.103:15826"
 
 # Directory where the index should be stored. It should have at least 70GB of free space.
 db_dir = "./db"

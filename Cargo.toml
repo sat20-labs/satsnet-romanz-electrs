@@ -22,13 +22,13 @@ spec = "internal/config_specification.toml"
 
 [dependencies]
 anyhow = "1.0"
-bitcoin = { package = "satsnet", version = "0.32.13", features = ["serde", "rand-std", "satsnet"] }
-bitcoin_slices = { package = "satsnet_slices", version = "0.9.4", features = ["bitcoin_with_satsnet", "sha2"] }
-bitcoincore-rpc = { package = "satsnet-rpc", version = "0.19.3", features = ["bitcoin_with_satsnet"] }
+bitcoin = { package = "satsnet", version = "0.32.14", features = ["serde", "rand-std", "satsnet"] }
+bitcoin_slices = { package = "satsnet_slices", version = "0.9.9", features = ["bitcoin_with_satsnet", "sha2"] }
+bitcoincore-rpc = { package = "satsnet-rpc", version = "=0.19.4", features = ["bitcoin_with_satsnet"] }
 
-# bitcoin = { package = "satsnet", path = "/Users/chenwenjie/test/rust/rust-satsnet/satsnet", version = "0.32.13", features = ["serde", "rand-std", "satsnet"] }
-# bitcoin_slices = { package = "satsnet_slices", path = "/Users/chenwenjie/test/rust/rust_satsnet_slices", version = "0.9.4", features = ["bitcoin_with_satsnet", "sha2"] }
-# bitcoincore-rpc = { package = "satsnet-rpc", path = "/Users/chenwenjie/test/rust/rust-satsnet-rpc/client", version = "0.19.3", features = ["bitcoin_with_satsnet"] }
+# bitcoin = { package = "satsnet", path = "/Users/chenwenjie/test/rust/rust-satsnet/satsnet", version = "0.32.14", features = ["serde", "rand-std", "satsnet"] }
+# bitcoin_slices = { package = "satsnet_slices", path = "/Users/chenwenjie/test/rust/rust_satsnet_slices", version = "0.9.9", features = ["bitcoin_with_satsnet", "sha2"] }
+# bitcoincore-rpc = { package = "satsnet-rpc", path = "/Users/chenwenjie/test/rust/rust-satsnet-rpc/client", version = "0.19.4", features = ["bitcoin_with_satsnet"] }
 
 configure_me = "0.4"
 crossbeam-channel = "0.5"
