@@ -983,9 +983,9 @@ dependencies = [
 
 [[package]]
 name = "satsnet_slices"
-version = "0.9.10"
+version = "0.9.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7099e4d2bb056fbe08a7eaca2699c7f85fac7d84f2b6cdb8ce26b084f832ea50"
+checksum = "885b1651a39bd411cfd8653cd2bd38aa3a03dfe4d49f059e4ff1ab8e3cd0c196"
 dependencies = [
  "bitcoin_hashes",
  "rustc-std-workspace-alloc",
