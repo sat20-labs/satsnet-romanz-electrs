@@ -29,7 +29,7 @@ daemon_p2p_addr = "192.168.10.102:19526"
 db_dir = "./db"
 
 # bitcoin means mainnet. Don't set to anything else unless you're a developer.
-# network = "bitcoin"
+# network = "satsnet"
 network = "satstestnet"
 
 # The address on which electrs should listen. Warning: 0.0.0.0 is probably a bad idea!
