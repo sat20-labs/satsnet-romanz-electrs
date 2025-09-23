@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use bitcoin::blockdata::block::Header as BlockHeader;
-use bitcoin::{BlockHash, Network};
+use bitcoin::{BlockHash, Network, CompactTarget};
+use bitcoin::{hashes::Hash, TxMerkleNode};
 
 /// A new header found, to be added to the chain at specific height
 pub(crate) struct NewHeader {
@@ -36,12 +37,80 @@ pub struct Chain {
 
 impl Chain {
     // create an empty chain
+    // pub fn new(network: Network) -> Self {
+    //     let genesis = bitcoin::blockdata::constants::genesis_block(network);
+    //     let genesis_hash = genesis.block_hash();
+    //     info!("fact genesis hash: {}", genesis_hash);
+    //     Self {
+    //         headers: vec![(genesis_hash, genesis.header)],
+    //         heights: std::iter::once((genesis_hash, 0)).collect(), // genesis header @ zero height
+    //     }
+    // }
     pub fn new(network: Network) -> Self {
-        let genesis = bitcoin::blockdata::constants::genesis_block(network);
-        let genesis_hash = genesis.block_hash();
+        // 定义 mainnet genesis
+        let (genesis_hash, genesis_header) = match network {
+            Network::Satsnet => {
+                let hash = BlockHash::from_byte_array([
+                    0x8b, 0xb2, 0x8a, 0x29, 0xfe, 0xb3, 0x8b, 0x85,
+                    0xb1, 0x7f, 0x16, 0x42, 0x46, 0xf0, 0xb7, 0x9f,
+                    0xdb, 0x79, 0xf5, 0x22, 0xf4, 0xb6, 0x9a, 0x87,
+                    0xee, 0x74, 0xa0, 0x52, 0x71, 0x63, 0x61, 0x41,
+                ]);
+
+                let merkle_root = TxMerkleNode::from_byte_array([
+                    0x22, 0x89, 0xb6, 0xf8, 0xc9, 0x0d, 0xce, 0x99,
+                    0xf8, 0x36, 0x8a, 0xe3, 0x93, 0x81, 0x2b, 0xcc,
+                    0x0a, 0xa4, 0xa6, 0xb1, 0xab, 0xa5, 0xf3, 0xb2,
+                    0x0c, 0x1a, 0x71, 0xbc, 0xe8, 0xdd, 0x18, 0x9e,
+                ]);
+
+                let header = BlockHeader {
+                    version: bitcoin::block::Version::ONE,
+                    prev_blockhash: BlockHash::all_zeros(),
+                    merkle_root,
+                    time: 1751454131,
+                    bits: CompactTarget::from_consensus(0),
+                    nonce: 2466277953,
+                };
+                (hash, header)
+            }
+
+            Network::Satstestnet => {
+                let hash = BlockHash::from_byte_array([
+                    0x21, 0x3a, 0xb6, 0xeb, 0x99, 0x39, 0x1c, 0xbb,
+                    0xb2, 0xb9, 0x8c, 0xaf, 0x93, 0x47, 0xaa, 0xb5,
+                    0xf4, 0x72, 0xd6, 0x95, 0x1f, 0xe2, 0x66, 0x70,
+                    0x57, 0xe1, 0x43, 0x4e, 0x04, 0x68, 0x1b, 0xdf,
+                ]);
+
+                let merkle_root = TxMerkleNode::from_byte_array([
+                    0xe8, 0xf5, 0x87, 0xe6, 0xd2, 0x00, 0xca, 0x9c,
+                    0x03, 0x92, 0xee, 0x74, 0x6d, 0xab, 0x24, 0xfd,
+                    0x7e, 0xf8, 0x01, 0x7b, 0xc2, 0xf4, 0x8d, 0x07,
+                    0x21, 0xe8, 0x78, 0x45, 0x41, 0x27, 0x55, 0xfa,
+                ]);
+
+                let header = BlockHeader {
+                    version: bitcoin::block::Version::ONE,
+                    prev_blockhash: BlockHash::all_zeros(),
+                    merkle_root,
+                    time: 1733136112,
+                    bits: CompactTarget::from_consensus(0),
+                    nonce: 1182242621,
+                };
+                (hash, header)
+            }
+
+            // 其它网络默认用原来的
+            other => {
+                let genesis = bitcoin::blockdata::constants::genesis_block(other);
+                (genesis.block_hash(), genesis.header)
+            }
+        };
+
         Self {
-            headers: vec![(genesis_hash, genesis.header)],
-            heights: std::iter::once((genesis_hash, 0)).collect(), // genesis header @ zero height
+            headers: vec![(genesis_hash, genesis_header)],
+            heights: std::iter::once((genesis_hash, 0)).collect(),
         }
     }
 
@@ -62,7 +131,7 @@ impl Chain {
 
         // 22e46d9d7a8e0b648555a084892bd8c0637b931b2ad029b01fe55f851df90dd3
         // let genesis_hash_str = "df1b68044e43e1577066e21f95d672f4b5aa4793af8cb9b2bb1c3999ebb63a21";
-        // info!("fact genesis hash: {}, temp genesis hash: {}", genesis_hash, genesis_hash_str);
+        info!("fact genesis hash: {}", genesis_hash);
         
         let header_map: HashMap<BlockHash, BlockHeader> =
             headers.map(|h| (h.block_hash(), h)).collect();
