@@ -270,7 +270,7 @@ impl Connection {
                         Ok(msg) => msg,
                         Err(err) => bail!("failed to parse {err}"),
                     };
-                    debug!("recv: {:?}", msg);
+                    trace!("recv: {:?}", msg);
 
                     match msg {
                         ParsedNetworkMessage::Version(version) => {
