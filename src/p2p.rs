@@ -270,7 +270,7 @@ impl Connection {
                         Ok(msg) => msg,
                         Err(err) => bail!("failed to parse {err}"),
                     };
-                    trace!("recv: {:?}", msg);
+                    debug!("recv: {:?}", msg);
 
                     match msg {
                         ParsedNetworkMessage::Version(version) => {
@@ -285,7 +285,13 @@ impl Connection {
 
                         },
                         ParsedNetworkMessage::Ping(nonce) => {
-                            tx_send.send(NetworkMessage::Pong(nonce))?; // connection keep-alive
+                            //tx_send.send(NetworkMessage::Pong(nonce))?; // connection keep-alive
+                            if let Err(e) = tx_send.send(NetworkMessage::Pong(nonce)) {
+                                eprintln!("Error sending Pong response for Ping(nonce={}): {}", nonce, e);
+                                return Err(e.into()); // 继续返回错误，保持逻辑一致
+                            } else {
+                                println!("Sent Pong response for Ping(nonce={})", nonce);
+                            }
                         }
                         ParsedNetworkMessage::Verack => {
                             init_send.send(())?; // peer acknowledged our version
@@ -400,13 +406,44 @@ enum ParsedNetworkMessage {
 
 impl Decodable for RawNetworkMessage {
     fn consensus_decode<D: bitcoin::io::Read + ?Sized>(d: &mut D) -> Result<Self, encode::Error> {
-        let magic = Decodable::consensus_decode(d)?;
-        let cmd = Decodable::consensus_decode(d)?;
+        let magic = match Decodable::consensus_decode(d) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Error decoding magic: {}", e);
+                return Err(e);
+            }
+        };
 
-        let len = u32::consensus_decode(d)?;
-        let _checksum = <[u8; 4]>::consensus_decode(d)?; // assume data is correct
+        let cmd: CommandString = match Decodable::consensus_decode(d) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Error decoding cmd: {}", e);
+                return Err(e);
+            }
+        };
+
+        let len = match u32::consensus_decode(d) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Error decoding length: {}", e);
+                return Err(e);
+            }
+        };
+
+        let _checksum = match <[u8; 4]>::consensus_decode(d) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Error decoding checksum: {}", e);
+                return Err(e);
+            }
+        };
+
         let mut raw = vec![0u8; len as usize];
-        d.read_slice(&mut raw)?;
+        if let Err(e) = d.read_slice(&mut raw) {
+            eprintln!("Error reading payload (len={}): {}", len, e);
+            return Err(e);
+        }
+
 
         Ok(RawNetworkMessage { magic, cmd, raw })
     }
