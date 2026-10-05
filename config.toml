@@ -12,29 +12,29 @@
 # cookie_file = "/var/run/bitcoin-mainnet/cookie"
 
 # The listening RPC address of bitcoind, port is usually 8332
-# daemon_rpc_addr = "192.168.10.102:8332"
+# daemon_rpc_addr = "192.168.1.102:8332"
 # testnet4
-# daemon_rpc_addr = "192.168.10.102:28332"
+# daemon_rpc_addr = "192.168.1.102:28332"
 # satsnet
-daemon_rpc_addr = "192.168.10.102:9527"
+daemon_rpc_addr = "192.168.1.102:19527"
 
 # The listening P2P address of bitcoind, port is usually 8333
-# daemon_p2p_addr = "192.168.10.102:8333"
+# daemon_p2p_addr = "192.168.1.102:8333"
 # testnet4
-# daemon_p2p_addr = "192.168.10.102:48333"
+# daemon_p2p_addr = "192.168.1.102:48333"
 # satsnet
-daemon_p2p_addr = "192.168.10.102:9526"
+daemon_p2p_addr = "192.168.1.102:19526"
 
 # Directory where the index should be stored. It should have at least 70GB of free space.
 db_dir = "./db"
 
-# bitcoin means mainnet. Don't set to anything else unless you're a developer.
-network = "satsnet"
-#network = "satstestnet"
+# SatoshiNet network: mainnet or testnet.
+# network = "mainnet"
+network = "testnet"
 
 # The address on which electrs should listen. Warning: 0.0.0.0 is probably a bad idea!
 # Tunneling is the recommended way to access electrs remotely.
-electrum_rpc_addr = "0.0.0.0:31001"
+electrum_rpc_addr = "0.0.0.0:30001"
 
 # How much information about internal workings should electrs print. Increase before reporting a bug.
 log_filters = "DEBUG"

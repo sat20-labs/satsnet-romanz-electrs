@@ -93,11 +93,12 @@ impl ResolvAddr {
 
 /// This newtype implements `ParseArg` for `Network`.
 #[derive(Deserialize)]
+#[serde(try_from = "String")]
 pub struct BitcoinNetwork(Network);
 
 impl Default for BitcoinNetwork {
     fn default() -> Self {
-        BitcoinNetwork(Network::Bitcoin)
+        BitcoinNetwork(Network::Satsnet)
     }
 }
 
@@ -105,7 +106,20 @@ impl FromStr for BitcoinNetwork {
     type Err = <Network as FromStr>::Err;
 
     fn from_str(string: &str) -> std::result::Result<Self, Self::Err> {
-        Network::from_str(string).map(BitcoinNetwork)
+        match string {
+            "mainnet" => Ok(BitcoinNetwork(Network::Satsnet)),
+            "testnet" => Ok(BitcoinNetwork(Network::Satstestnet)),
+            "testnet3" => Ok(BitcoinNetwork(Network::Testnet)),
+            _ => Network::from_str(string).map(BitcoinNetwork),
+        }
+    }
+}
+
+impl std::convert::TryFrom<String> for BitcoinNetwork {
+    type Error = <Self as FromStr>::Err;
+
+    fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
+        value.parse()
     }
 }
 
@@ -113,7 +127,7 @@ impl ::configure_me::parse_arg::ParseArgFromStr for BitcoinNetwork {
     fn describe_type<W: fmt::Write>(mut writer: W) -> fmt::Result {
         write!(
             writer,
-            "either 'bitcoin', 'testnet', 'testnet4', 'satsnet', 'satstestnet', 'regtest' or 'signet'"
+            "SatoshiNet 'mainnet' or 'testnet'; Bitcoin 'bitcoin', 'testnet3', 'testnet4', 'regtest' or 'signet'"
         )
     }
 }
@@ -211,8 +225,8 @@ impl Config {
             Network::Testnet4 => "testnet4",
             Network::Regtest => "regtest",
             Network::Signet => "signet",
-            Network::Satsnet => "satsnet",
-            Network::Satstestnet => "satstestnet",
+            Network::Satsnet => "mainnet",
+            Network::Satstestnet => "testnet",
             unsupported => unsupported_network(unsupported),
         };
 
@@ -224,8 +238,8 @@ impl Config {
             Network::Testnet4 => 48332,
             Network::Regtest => 18443,
             Network::Signet => 38332,
-            Network::Satsnet => 4827,
-            Network::Satstestnet => 14827,
+            Network::Satsnet => 9527,
+            Network::Satstestnet => 19527,
             unsupported => unsupported_network(unsupported),
         };
         let default_daemon_p2p_port = match config.network {
@@ -234,8 +248,8 @@ impl Config {
             Network::Testnet4 => 48333,
             Network::Regtest => 18444,
             Network::Signet => 38333,
-            Network::Satsnet => 4826,
-            Network::Satstestnet => 14826,
+            Network::Satsnet => 9526,
+            Network::Satstestnet => 19526,
             unsupported => unsupported_network(unsupported),
         };
         let default_electrum_port = match config.network {
@@ -304,8 +318,8 @@ impl Config {
             Network::Testnet4 => config.daemon_dir.push("testnet4"),
             Network::Regtest => config.daemon_dir.push("regtest"),
             Network::Signet => config.daemon_dir.push("signet"),
-            Network::Satsnet => config.daemon_dir.push("satsnet"),
-            Network::Satstestnet => config.daemon_dir.push("satstestnet"),
+            Network::Satsnet => config.daemon_dir.push("mainnet"),
+            Network::Satstestnet => config.daemon_dir.push("testnet"),
             unsupported => unsupported_network(unsupported),
         }
 
@@ -424,5 +438,22 @@ mod tests {
             format!("{:?}", SensitiveAuth(auth)),
             "UserPass(\"user\", \"<sensitive>\")"
         );
+    }
+}
+
+#[cfg(test)]
+mod canonical_network_tests {
+    use super::{BitcoinNetwork, Network};
+
+    #[test]
+    fn canonical_names_select_satoshinet_parameters() {
+        assert_eq!("mainnet".parse::<BitcoinNetwork>().unwrap().0, Network::Satsnet);
+        assert_eq!("testnet".parse::<BitcoinNetwork>().unwrap().0, Network::Satstestnet);
+    }
+
+    #[test]
+    fn config_network_uses_the_same_parser() {
+        let network: BitcoinNetwork = serde_json::from_str("\"testnet\"").unwrap();
+        assert_eq!(network.0, Network::Satstestnet);
     }
 }

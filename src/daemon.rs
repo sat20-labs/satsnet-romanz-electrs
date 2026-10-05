@@ -129,9 +129,14 @@ impl Daemon {
         }
 
         let network_info = rpc.get_network_info()?;
-        // if network_info.version < 21_00_00 {
-        if network_info.version < 24_02_00 {
-            bail!("electrs requires satsnet 240200+");
+        // SatoshiNet getinfo encodes major * 1_000_000 + minor * 10_000 + patch * 100.
+        let (minimum_version, required_node) = match config.network {
+            bitcoin::Network::Satsnet | bitcoin::Network::Satstestnet =>
+                (1_000_000, "SatoshiNet 1.0.0+"),
+            _ => (24_02_00, "Bitcoin Core 24.2.0+"),
+        };
+        if network_info.version < minimum_version {
+            bail!("electrs requires {} (node version: {})", required_node, network_info.version);
         }
         // if !network_info.network_active {
         //     bail!("electrs requires active bitcoind p2p network");

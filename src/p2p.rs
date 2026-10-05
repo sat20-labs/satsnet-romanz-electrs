@@ -380,6 +380,10 @@ impl RawNetworkMessage {
                 ParsedNetworkMessage::Headers(headers)
             }
             "ping" => ParsedNetworkMessage::Ping(Decodable::consensus_decode(&mut raw)?),
+            // DKVS traffic is independent of the block and transaction index.
+            "dkvsnotify" | "dkvsinv" | "dkvsget" | "dkvsdata" | "dkvssyncreq" | "dkvssyncres" => {
+                ParsedNetworkMessage::Ignored
+            }
             "pong" => ParsedNetworkMessage::Ignored, // unused
             "addr" => ParsedNetworkMessage::Ignored, // unused
             "alert" => ParsedNetworkMessage::Ignored, // https://bitcoin.org/en/alert/2016-11-01-alert-retirement
@@ -454,4 +458,33 @@ impl Decodable for RawNetworkMessage {
 pub fn duration_to_seconds(d: Duration) -> f64 {
     let nanos = f64::from(d.subsec_nanos()) / 1e9;
     d.as_secs() as f64 + nanos
+}
+
+#[cfg(test)]
+mod satoshinet_message_tests {
+    use super::{CommandString, Magic, ParsedNetworkMessage, RawNetworkMessage};
+
+    #[test]
+    fn dkvs_messages_do_not_disconnect_block_indexer() {
+        for command in [
+            "dkvsnotify", "dkvsinv", "dkvsget", "dkvsdata", "dkvssyncreq", "dkvssyncres",
+        ] {
+            let message = RawNetworkMessage {
+                magic: Magic::from_bytes([0, 0, 0, 0]),
+                cmd: CommandString::try_from(command).unwrap(),
+                raw: vec![0, 1, 2],
+            };
+            assert!(matches!(message.parse().unwrap(), ParsedNetworkMessage::Ignored));
+        }
+    }
+
+    #[test]
+    fn malformed_required_message_is_still_rejected() {
+        let message = RawNetworkMessage {
+            magic: Magic::from_bytes([0, 0, 0, 0]),
+            cmd: CommandString::try_from("ping").unwrap(),
+            raw: vec![0],
+        };
+        assert!(message.parse().is_err());
+    }
 }
