@@ -941,9 +941,8 @@ checksum = "f98d2aa92eebf49b69786be48e4477826b256916e84a57ff2a4f21923b48eb4c"
 
 [[package]]
 name = "satsnet"
-version = "0.32.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3b230069fa607ab63e8b06f18c68127f8cbe8966892b554bbaa37258005642d"
+version = "0.32.18"
+source = "git+ssh://git@github.com/sat20-labs/rust-satsnet.git?rev=49d727d78f0b0733e0f67e81fb3553689f4bcc9b#49d727d78f0b0733e0f67e81fb3553689f4bcc9b"
 dependencies = [
  "base58ck",
  "bech32",
@@ -983,9 +982,8 @@ dependencies = [
 
 [[package]]
 name = "satsnet_slices"
-version = "0.9.15"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4cc2ab317983863452c9d0b31e7266d9bece94e6074925de8f62239619d24f31"
+version = "0.9.16"
+source = "git+ssh://git@github.com/sat20-labs/rust_satsnet_slices.git?rev=744ab1951c76a72f69a76984fd39b3d0192d4250#744ab1951c76a72f69a76984fd39b3d0192d4250"
 dependencies = [
  "bitcoin_hashes",
  "rustc-std-workspace-alloc",

@@ -22,8 +22,8 @@ spec = "internal/config_specification.toml"
 
 [dependencies]
 anyhow = "1.0"
-bitcoin = { package = "satsnet", version = "0.32.17", features = ["serde", "rand-std", "satsnet"] }
-bitcoin_slices = { package = "satsnet_slices", version = "0.9.15", features = ["bitcoin_with_satsnet", "sha2"] }
+bitcoin = { package = "satsnet", version = "=0.32.18", features = ["serde", "rand-std", "satsnet"] }
+bitcoin_slices = { package = "satsnet_slices", version = "=0.9.16", features = ["bitcoin_with_satsnet", "sha2"] }
 bitcoincore-rpc = { package = "satsnet-rpc", version = "=0.19.7", features = ["bitcoin_with_satsnet"] }
 
 # bitcoin = { package = "satsnet", path = "/Users/chenwenjie/test/rust/rust-satsnet/satsnet", version = "0.32.17", features = ["serde", "rand-std", "satsnet"] }
@@ -64,3 +64,8 @@ tempfile = "3.13"
 
 [profile.release]
 lto = true
+
+# Keep the same SatoshiNet types throughout the RPC and slices dependency graph.
+[patch.crates-io]
+satsnet = { git = "ssh://git@github.com/sat20-labs/rust-satsnet.git", rev = "49d727d78f0b0733e0f67e81fb3553689f4bcc9b" }
+satsnet_slices = { git = "ssh://git@github.com/sat20-labs/rust_satsnet_slices.git", rev = "744ab1951c76a72f69a76984fd39b3d0192d4250" }
